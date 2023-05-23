@@ -11,7 +11,6 @@
 
 int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)), char **env)
 {
- 
 	char *buffer = NULL, *prompt = "$ ";
 	size_t buff_size = 0;
 	ssize_t bytes = 0;
@@ -28,7 +27,7 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 
 		write(STDOUT_FILENO, prompt, 2);
 		/*read data from user*/
-		bytes = getline(&buffer,&buff_size, stdin);
+		bytes = getline( &buffer, &buff_size, stdin);
 		if (bytes == -1)
 		{
 			perror("Error no line");
@@ -38,7 +37,7 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 		/* read and replace newline character with terminator*/
 		else
 		{
-			if (buffer[bytes -1] == '\n')
+			if (buffer[bytes - 1] == '\n')
 			{
 				buffer[bytes - 1] = '\0';
 			}
@@ -66,19 +65,14 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 			exit(EXIT_FAILURE);
 		}
 	}
-
-
 	free(buffer);
 	return (0);
 }
-
 void _execute(char *args, struct stat *statbuffer, char **envp)
 {
-
 	char **argv;
 	int argc;
 	char *command = NULL, *actual_command = NULL;
-
 
 	(void)envp;
 	(void)statbuffer;
@@ -90,8 +84,4 @@ void _execute(char *args, struct stat *statbuffer, char **envp)
 	execve(actual_command, argv, envp);
 	perror("error executing");
 	exit(EXIT_FAILURE);
-
 }
-
-
-
