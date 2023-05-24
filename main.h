@@ -22,6 +22,4 @@ char *_strdup(const char *str);
 char *_strtok(char *str, const char *delim);
 int _strncmp(char *str1, const char *str2, size_t num);
 char *_strchr(char *s, char c);
-int setenv(const char *name, const char *value, int overwrite);
-int unsetenv(const char *name);
 #endif
