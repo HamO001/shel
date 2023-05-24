@@ -1,14 +1,13 @@
 /*header files*/
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <sys/stat.h>
-#include <string.h>
 
-
+/**
+ * main - main function
+ * @argc: argument count
+ * @argv: array containing arguments
+ * @env: environment the program runs in
+ * Return: 0
+ */
 int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)), char **env)
 {
 	char *buffer = NULL, *prompt = "$ ";
@@ -18,6 +17,7 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 	pid_t wpid;
 	bool pipe = false;
 	struct stat statbuffer;
+	char *directory;
 
 
 	while (true && !pipe)
@@ -26,15 +26,13 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 			pipe = true;
 
 		write(STDOUT_FILENO, prompt, 2);
-		/*read data from user*/
-		bytes = getline( &buffer, &buff_size, stdin);
+		bytes = _getline(&buffer, &buff_size, stdin);
 		if (bytes == -1)
 		{
 			perror("Error no line");
 			free(buffer);
 			exit(EXIT_FAILURE);
 		}
-		/* read and replace newline character with terminator*/
 		else
 		{
 			if (buffer[bytes - 1] == '\n')
@@ -42,24 +40,28 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 				buffer[bytes - 1] = '\0';
 			}
 		}
-		if (strcmp(buffer, "exit") == 0)
+		if (_strcmp(buffer, "exit") == 0)
 		{
 			break;
 		}
-		/* create child process to handle command*/
+		if (_strncmp(buffer, "cd", 2) == 0)
+		{
+			directory = buffer + 3;
+			if (chdir(directory) != 0)
+				perror("cd");
+			continue;
+		}
 		wpid = fork();
 		if (wpid == -1)
 		{
 			perror("child process not created");
 			exit(EXIT_FAILURE);
 		}
-		/*execute child process*/
 		if (wpid == 0)
 		{
-			_execute(buffer, &statbuffer,env);
+			_execute(buffer, &statbuffer, env);
 		}
-		/* make parent process wait for child process */
-		if (waitpid(wpid, &wait_status,0) == -1)
+		if (waitpid(wpid, &wait_status, 0) == -1)
 		{
 			perror("Error wait for child process to finish");
 			exit(EXIT_FAILURE);
@@ -68,6 +70,13 @@ int main(int argc __attribute__((unused)), char *argv[] __attribute__((unused)),
 	free(buffer);
 	return (0);
 }
+/**
+ * _execute - function to execute chirld process
+ * @args: pointer to memory with arguments
+ * @statbuffer: pointer to memory statbuffer
+ * @envp: the environment to run the commands
+ * Return: void
+ */
 void _execute(char *args, struct stat *statbuffer, char **envp)
 {
 	char **argv;
